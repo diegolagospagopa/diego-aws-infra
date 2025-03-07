@@ -1,3 +1,13 @@
+locals {
+  project_name = "${var.environment}-diego-lab"
+
+  south_europe_az1 = "eu-south-1a"
+  south_europe_az2 = "eu-south-1b"
+
+  eks_name = "diego-eks"
+  env      = var.environment
+}
+
 variable "aws_region" {
   type        = string
   description = "AWS region to create resources. Default Milan"
