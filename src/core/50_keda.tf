@@ -1,22 +1,3 @@
-resource "helm_release" "keda" {
-  name             = "keda"
-  repository       = "https://kedacore.github.io/charts"
-  chart            = "keda"
-  namespace        = "keda"
-  create_namespace = true
-  version          = "2.12.1"  # Latest stable version as of now
-
-  set {
-    name  = "serviceAccount.create"
-    value = "true"
-  }
-
-  set {
-    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
-    value = aws_iam_role.keda_role.arn
-  }
-}
-
 # Create IAM role for KEDA
 resource "aws_iam_role" "keda_role" {
   name = "eks-keda-role"
@@ -66,4 +47,23 @@ resource "aws_iam_role_policy" "keda_policy" {
       }
     ]
   })
+}
+
+resource "helm_release" "keda" {
+  name             = "keda"
+  repository       = "https://kedacore.github.io/charts"
+  chart            = "keda"
+  namespace        = "keda"
+  create_namespace = true
+  version          = "2.12.1"  # Latest stable version as of now
+
+  set {
+    name  = "serviceAccount.create"
+    value = "true"
+  }
+
+  set {
+    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+    value = aws_iam_role.keda_role.arn
+  }
 }
