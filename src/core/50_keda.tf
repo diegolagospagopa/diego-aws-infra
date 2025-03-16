@@ -55,7 +55,7 @@ resource "helm_release" "keda" {
   chart            = "keda"
   namespace        = "keda"
   create_namespace = true
-  version          = "2.12.1"  # Latest stable version as of now
+  version          = "2.16.1"  # Latest stable version as of now
 
   set {
     name  = "serviceAccount.create"
