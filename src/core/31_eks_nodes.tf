@@ -33,6 +33,12 @@ resource "aws_iam_role_policy_attachment" "amazon_ec2_container_registry_read_on
   role       = aws_iam_role.nodes.name
 }
 
+# Add AutoScaling policy attachment
+resource "aws_iam_role_policy_attachment" "amazon_eks_autoscaling" {
+  policy_arn = "arn:aws:iam::aws:policy/AutoScalingFullAccess"
+  role       = aws_iam_role.nodes.name
+}
+
 resource "aws_eks_node_group" "general" {
   cluster_name    = aws_eks_cluster.eks.name
   version         = 1.31
@@ -44,13 +50,13 @@ resource "aws_eks_node_group" "general" {
     aws_subnet.private_2.id
   ]
 
-  capacity_type  = "ON_DEMAND"
-  instance_types = ["t3.small"]
+  capacity_type  = "SPOT"  # Changed to SPOT instances
+  instance_types = ["t3.small"]  # Multiple instance types for better spot availability
 
   scaling_config {
     desired_size = 1
     max_size     = 1
-    min_size     = 0
+    min_size     = 1
   }
 
   update_config {
@@ -59,12 +65,42 @@ resource "aws_eks_node_group" "general" {
 
   labels = {
     role = "general"
+    lifecycle = "Ec2Spot"
+  }
+
+  # Add taints to prefer spot instances
+  taint {
+    key    = "lifecycle"
+    value  = "Ec2Spot"
+    effect = "NO_SCHEDULE"
+  }
+
+  lifecycle {
+    ignore_changes = [
+      scaling_config[0].desired_size,
+      scaling_config[0].max_size,
+      scaling_config[0].min_size
+    ]
   }
 
   depends_on = [
     aws_iam_role_policy_attachment.amazon_eks_worker_node_policy,
     aws_iam_role_policy_attachment.amazon_eks_cni_policy,
     aws_iam_role_policy_attachment.amazon_ec2_container_registry_read_only,
+    aws_iam_role_policy_attachment.amazon_eks_autoscaling,
   ]
+}
 
+# CPU-based autoscaling policy
+resource "aws_autoscaling_policy" "cpu_policy" {
+  name                   = "${local.project_name}-cpu-scaling"
+  autoscaling_group_name = aws_eks_node_group.general.resources[0].autoscaling_groups[0].name
+  policy_type           = "TargetTrackingScaling"
+
+  target_tracking_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ASGAverageCPUUtilization"
+    }
+    target_value = 75.0  # Scale when CPU utilization reaches 75%
+  }
 }
