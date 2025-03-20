@@ -65,14 +65,7 @@ resource "aws_eks_node_group" "general" {
 
   labels = {
     role = "general"
-    lifecycle = "Ec2Spot"
-  }
-
-  # Add taints to prefer spot instances
-  taint {
-    key    = "lifecycle"
-    value  = "Ec2Spot"
-    effect = "NO_SCHEDULE"
+    lifecycle = "OnDemand"
   }
 
   lifecycle {
