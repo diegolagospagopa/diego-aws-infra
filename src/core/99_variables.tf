@@ -4,7 +4,7 @@ locals {
   south_europe_az1 = "eu-south-1a"
   south_europe_az2 = "eu-south-1b"
 
-  eks_name = "diego-eks"
+  eks_name = "${local.project_name}-eks"
   env      = var.environment
 }
 
