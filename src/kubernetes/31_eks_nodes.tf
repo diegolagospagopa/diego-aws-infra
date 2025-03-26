@@ -39,8 +39,8 @@ resource "aws_iam_role_policy_attachment" "amazon_eks_autoscaling" {
   role       = aws_iam_role.nodes.name
 }
 
-resource "aws_eks_node_group" "core_node" {
-  cluster_name    = aws_eks_cluster.eks.name
+resource "aws_eks_node_group" "main_node" {
+  cluster_name    = aws_eks_cluster.core.name
   version         = 1.31
   node_group_name = "${local.eks_name}-nodes"
   node_role_arn   = aws_iam_role.nodes.arn
@@ -51,7 +51,7 @@ resource "aws_eks_node_group" "core_node" {
   ]
 
   capacity_type  = "ON_DEMAND"
-  instance_types = ["t3.medium"]  # Multiple instance types for better spot availability
+  instance_types = ["t3.small"]
 
   scaling_config {
     desired_size = 1
@@ -61,6 +61,12 @@ resource "aws_eks_node_group" "core_node" {
 
   update_config {
     max_unavailable = 1
+  }
+
+  # Add the Cilium security group
+  launch_template {
+    version = "$Latest"
+    name = aws_launch_template.main_nodes.name
   }
 
   labels = {
@@ -84,10 +90,29 @@ resource "aws_eks_node_group" "core_node" {
   ]
 }
 
+# Launch template for the node group
+resource "aws_launch_template" "main_nodes" {
+  name_prefix   = "${local.eks_name}-node-"
+  instance_type = "t3.medium"
+
+  vpc_security_group_ids = [aws_security_group.cilium_overlay.id]
+
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name = "${local.eks_name}-node"
+    }
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
 # CPU-based autoscaling policy
 resource "aws_autoscaling_policy" "cpu_policy" {
   name                   = "${local.project_name}-cpu-scaling"
-  autoscaling_group_name = aws_eks_node_group.core_node.resources[0].autoscaling_groups[0].name
+  autoscaling_group_name = aws_eks_node_group.main_node.resources[0].autoscaling_groups[0].name
   policy_type           = "TargetTrackingScaling"
 
   target_tracking_configuration {
