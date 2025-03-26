@@ -45,10 +45,7 @@ resource "aws_eks_node_group" "main_node" {
   node_group_name = "${local.eks_name}-nodes"
   node_role_arn   = aws_iam_role.nodes.arn
 
-  subnet_ids = [
-    aws_subnet.private_1.id,
-    aws_subnet.private_2.id
-  ]
+  subnet_ids = data.aws_subnets.private.ids
 
   capacity_type  = "ON_DEMAND"
   instance_types = ["t3.small"]

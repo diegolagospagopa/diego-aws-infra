@@ -32,10 +32,7 @@ resource "aws_eks_cluster" "core" {
     endpoint_private_access = false
     endpoint_public_access  = true
 
-    subnet_ids = [
-      aws_subnet.private_1.id,
-      aws_subnet.private_2.id
-    ]
+    subnet_ids = data.aws_subnets.private.ids
   }
 
   kubernetes_network_config {
