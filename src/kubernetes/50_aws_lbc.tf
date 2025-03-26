@@ -56,7 +56,7 @@ resource "helm_release" "aws_lbc" {
 
   set {
     name  = "vpcId"
-    value = aws_vpc.core.id
+    value = data.aws_vpc.core.id
   }
 
 }
