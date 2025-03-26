@@ -23,7 +23,7 @@ resource "aws_iam_role_policy_attachment" "eks" {
 #
 # ⛴️ EKS Cluster
 #
-resource "aws_eks_cluster" "core" {
+resource "aws_eks_cluster" "eks" {
   name     = local.eks_name
   version  = "1.33"
   role_arn = aws_iam_role.eks.arn

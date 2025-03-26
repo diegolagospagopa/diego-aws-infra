@@ -6,6 +6,7 @@ locals {
 
   eks_name = "${local.project_name}-eks"
   env      = var.environment
+  eks_instance_type = "t3.medium"
 }
 
 variable "aws_region" {
