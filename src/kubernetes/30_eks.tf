@@ -20,9 +20,12 @@ resource "aws_iam_role_policy_attachment" "eks" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 }
 
+#
+# ⛴️ EKS Cluster
+#
 resource "aws_eks_cluster" "core" {
   name     = local.eks_name
-  # version  =
+  version  = "1.33"
   role_arn = aws_iam_role.eks.arn
 
   vpc_config {
@@ -33,6 +36,11 @@ resource "aws_eks_cluster" "core" {
       aws_subnet.private_1.id,
       aws_subnet.private_2.id
     ]
+  }
+
+  kubernetes_network_config {
+    ip_family = "ipv4"
+    service_ipv4_cidr = "10.100.0.0/16"
   }
 
   access_config {
