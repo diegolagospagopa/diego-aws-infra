@@ -42,7 +42,7 @@ resource "aws_iam_role_policy_attachment" "amazon_eks_autoscaling" {
 resource "aws_eks_node_group" "core_node" {
   cluster_name    = aws_eks_cluster.eks.name
   version         = 1.31
-  node_group_name = "core_node"
+  node_group_name = "${local.eks_name}-nodes"
   node_role_arn   = aws_iam_role.nodes.arn
 
   subnet_ids = [

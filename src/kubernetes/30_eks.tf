@@ -20,8 +20,8 @@ resource "aws_iam_role_policy_attachment" "eks" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 }
 
-resource "aws_eks_cluster" "eks" {
-  name     = "${local.eks_name}"
+resource "aws_eks_cluster" "core" {
+  name     = local.eks_name
   # version  =
   role_arn = aws_iam_role.eks.arn
 

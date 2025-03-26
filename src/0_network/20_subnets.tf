@@ -9,6 +9,8 @@ resource "aws_subnet" "public_1" {
     "kubernetes.io/role/elb"                            = "1"
     "kubernetes.io/cluster/${local.eks_name}" = "owned"
   }
+
+  depends_on = [aws_vpc.core]
 }
 
 resource "aws_subnet" "public_2" {
@@ -22,6 +24,8 @@ resource "aws_subnet" "public_2" {
     "kubernetes.io/role/elb"                            = "1"
     "kubernetes.io/cluster/${local.eks_name}" = "owned"
   }
+
+  depends_on = [aws_vpc.core]
 }
 
 resource "aws_subnet" "private_1" {
@@ -34,6 +38,8 @@ resource "aws_subnet" "private_1" {
     "kubernetes.io/role/internal-elb"                      = "1"
     "kubernetes.io/cluster/${local.eks_name}" = "owned"
   }
+
+  depends_on = [aws_vpc.core]
 }
 
 resource "aws_subnet" "private_2" {
@@ -46,5 +52,6 @@ resource "aws_subnet" "private_2" {
     "kubernetes.io/role/internal-elb"                      = "1"
     "kubernetes.io/cluster/${local.eks_name}" = "owned"
   }
-}
 
+  depends_on = [aws_vpc.core]
+}
