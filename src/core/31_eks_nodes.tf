@@ -39,10 +39,10 @@ resource "aws_iam_role_policy_attachment" "amazon_eks_autoscaling" {
   role       = aws_iam_role.nodes.name
 }
 
-resource "aws_eks_node_group" "general" {
+resource "aws_eks_node_group" "core_node" {
   cluster_name    = aws_eks_cluster.eks.name
   version         = 1.31
-  node_group_name = "general"
+  node_group_name = "core_node"
   node_role_arn   = aws_iam_role.nodes.arn
 
   subnet_ids = [
@@ -50,8 +50,8 @@ resource "aws_eks_node_group" "general" {
     aws_subnet.private_2.id
   ]
 
-  capacity_type  = "SPOT"  # Changed to SPOT instances
-  instance_types = ["t3.small"]  # Multiple instance types for better spot availability
+  capacity_type  = "ON_DEMAND"
+  instance_types = ["t3.medium"]  # Multiple instance types for better spot availability
 
   scaling_config {
     desired_size = 1
@@ -64,7 +64,7 @@ resource "aws_eks_node_group" "general" {
   }
 
   labels = {
-    role = "general"
+    role = "core_node"
     lifecycle = "OnDemand"
   }
 
@@ -87,7 +87,7 @@ resource "aws_eks_node_group" "general" {
 # CPU-based autoscaling policy
 resource "aws_autoscaling_policy" "cpu_policy" {
   name                   = "${local.project_name}-cpu-scaling"
-  autoscaling_group_name = aws_eks_node_group.general.resources[0].autoscaling_groups[0].name
+  autoscaling_group_name = aws_eks_node_group.core_node.resources[0].autoscaling_groups[0].name
   policy_type           = "TargetTrackingScaling"
 
   target_tracking_configuration {
